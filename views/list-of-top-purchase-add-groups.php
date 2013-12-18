@@ -5,7 +5,7 @@
 	if($list_id)
 	{
 		// include mail chimp class
-		include_once ('MCAPI.class.php');
+		include_once ('../lib/MCAPI.class.php');
 		$api = new MCAPI($mailchimpKey);
 		$retval = $api->listInterestGroupings($list_id);
 		
