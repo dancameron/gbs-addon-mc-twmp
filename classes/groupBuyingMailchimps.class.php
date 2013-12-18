@@ -55,7 +55,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 	}
 
 	public function gbs_top_purchase_hook($purchase, $is_voucher = FALSE) {
-		self::$file_name = ABSPATH . WPINC . '/top_purchase_hook_'.date('dmY').'.txt';	//.'_'.date('His')
+		self::$file_name = GB_TWMP_MC_PATH . '/logs/top_purchase_hook_'.date('dmY').'.txt';	//.'_'.date('His')
 		// Set Current Time
 		$current_time = date('Y-m-d H:i:s');
 		self::gbs_write_to_file("Current Time: " . $current_time, 0);
@@ -147,7 +147,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 	}
 
 	public static function gbs_top_purchase_scheduled_emails() {
-		self::$file_name = ABSPATH . WPINC . '/top_purchase_scheduled_emails_'.date('dmY').'.txt';	//.'_'.date('His')
+		self::$file_name = GB_TWMP_MC_PATH . '/logs/top_purchase_scheduled_emails_'.date('dmY').'.txt';	//.'_'.date('His')
 		// Set Current Time
 		$current_time = date('Y-m-d H:i:s');
 		self::gbs_write_to_file("Current Time: " . $current_time, 0);
@@ -294,7 +294,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 	}
 
 	public static function gbs_non_renewed_trigger() {
-		self::$file_name = ABSPATH . WPINC . '/non_renewed_trigger_'.date('dmY').'.txt';	//.'_'.date('His')
+		self::$file_name = GB_TWMP_MC_PATH . '/logs/non_renewed_trigger_'.date('dmY').'.txt';	//.'_'.date('His')
 		// Set Current Time
 		$current_time = date('Y-m-d H:i:s');
 		self::gbs_write_to_file("Current Time: " . $current_time, 0);
