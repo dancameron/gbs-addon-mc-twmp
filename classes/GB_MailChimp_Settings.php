@@ -129,11 +129,11 @@ if ( class_exists( 'Group_Buying_Controller' ) ) {
 				$mailchimp_templates = $api->templates($gbs_mailchimp_api_key, array('user'=>false));
 
 				// Deals
-				$deals = Group_Buying_Mailchimp_Model::get_active_publish_deals(time());
+				$deals = GB_MailChimp_Utility::get_active_publish_deals(time());
 				foreach ($deals as $key=>$value) {
-					$purchase_count = Group_Buying_Mailchimp_Model::get_deal_meta($value->ID, '_max_purchases');
+					$purchase_count = GB_MailChimp_Utility::get_deal_meta($value->ID, '_max_purchases');
 					if ($purchase_count > -1) {
-						if ($purchase_count == Group_Buying_Mailchimp_Model::get_count_deal_purchase($value->ID)) {
+						if ($purchase_count == GB_MailChimp_Utility::get_count_deal_purchase($value->ID)) {
 							unset ($deals[$key]);
 						}
 					}

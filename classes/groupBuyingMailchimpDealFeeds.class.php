@@ -125,17 +125,17 @@ class Group_Buying_Mailchimp_Deal_Feeds extends Group_Buying_Controller {
 
 		$items = array();
 
-		$deals = Group_Buying_Mailchimp_Model::get_active_publish_deals(time());
+		$deals = GB_MailChimp_Utility::get_active_publish_deals(time());
 
-		foreach ($deals as $key=>$value) {
+		foreach ($deals as $key => $value) {
 			$deal_id = $value->ID;
 			$post_thumbnail = ( has_post_thumbnail($deal_id) ) ? get_the_post_thumbnail($deal_id, 'deal-post-thumbnail-rss') : false;
-			$deal = Group_Buying_Mailchimp_Model::get_deal_details($deal_id);
-			$categories = Group_Buying_Mailchimp_Model::get_deal_categories($deal_id);
-			$price = Group_Buying_Mailchimp_Model::get_deal_meta($deal_id, '_base_price');
-			$discount = Group_Buying_Mailchimp_Model::get_deal_meta($deal_id, '_amount_saved');
-			$image_id = Group_Buying_Mailchimp_Model::get_deal_meta($deal_id, '_thumbnail_id');
-			$image = Group_Buying_Mailchimp_Model::get_deal_meta($image_id, '_wp_attached_file');
+			$deal = GB_MailChimp_Utility::get_deal_details($deal_id);
+			$categories = GB_MailChimp_Utility::get_deal_categories($deal_id);
+			$price = GB_MailChimp_Utility::get_deal_meta($deal_id, '_base_price');
+			$discount = GB_MailChimp_Utility::get_deal_meta($deal_id, '_amount_saved');
+			$image_id = GB_MailChimp_Utility::get_deal_meta($deal_id, '_thumbnail_id');
+			$image = GB_MailChimp_Utility::get_deal_meta($image_id, '_wp_attached_file');
 
 			$html = '
 			
