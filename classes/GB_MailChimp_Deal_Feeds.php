@@ -7,11 +7,10 @@
  * @subpackage Base
  * @todo  move to the deals controller
  */
-class Group_Buying_Mailchimp_Deal_Feeds extends Group_Buying_Controller {
+class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 	// TODO This needs to be completely rewritten and use the WP feed API.
 	const DEAL_FEED_PATH_OPTION = 'gbs_deal_feed_path';
 	const DEAL_FEED_QUERY_VAR = 'gb_show_deal_feed';
-	const ADD_TO_DEAL_FEED_QUERY_VAR = 'add_to_deal_feed';
 	const AFFILIATE_XML_QUERY_VAR = 'affiliate_xml';
 	private static $deal_feed_path = 'gb_deal_feed';
 	private static $instance;
@@ -19,34 +18,62 @@ class Group_Buying_Mailchimp_Deal_Feeds extends Group_Buying_Controller {
 
 	public static function init() {
 		self::$deal_feed_path = get_option( self::DEAL_FEED_PATH_OPTION, self::$deal_feed_path );
-		self::register_query_var( self::ADD_TO_DEAL_FEED_QUERY_VAR, array( get_class(), 'add_to_deal_feed' ) );
-		add_action( 'admin_init', array( get_class(), 'register_settings_fields' ), 50, 1 );
-		self::register_path_callback( self::$deal_feed_path, array( get_class(), 'on_deal_feed_page' ), self::ADD_TO_DEAL_FEED_QUERY_VAR );
+		self::register_settings();
 
-		// TODO
-		// add_feed('Some Title', array( get_class(), 'added_feed_example' ) );
-
-		// Add the deal to the RSS feed
-		add_filter( 'the_excerpt_deal_rss', array( get_class(), 'deal_feed_custom_rss' ) );
-		add_filter( 'the_content_deal_feed', array( get_class(), 'deal_feed_custom_rss' ) );
+		add_action( 'gb_router_generate_routes', array( get_class(), 'register_registration_callback' ), 10, 1 );
 	}
 
-	public static function register_settings_fields() {
-		$page = Group_Buying_UI::get_settings_page();
-		$section = 'gb_feed_paths';
-		add_settings_section( $section, null, array( get_class(), 'display_feed_paths_section' ), $page );
-
+	/**
+	 * Hooked on init add the settings page and options.
+	 *
+	 */
+	public static function register_settings() {
 		// Settings
-		register_setting( $page, self::DEAL_FEED_PATH_OPTION );
-		add_settings_field( self::DEAL_FEED_PATH_OPTION, self::__( 'Feed Path' ), array( get_class(), 'display_feed_path' ), $page, $section );
+		$settings = array(
+			'gb_url_path_deal_feeds' => array(
+				'weight' => 180,
+				'settings' => array(
+					self::DEAL_FEED_PATH_OPTION => array(
+						'label' => self::__( 'Deal Feed Path' ),
+						'option' => array(
+							'label' => trailingslashit( get_home_url() ),
+							'type' => 'text',
+							'default' => self::$deal_feed_path
+							)
+						)
+					)
+				)
+			);
+		do_action( 'gb_settings', $settings, Group_Buying_UI::SETTINGS_PAGE );
 	}
 
-	public static function display_feed_paths_section() {
-		echo self::__( '<h4>Customize the Feed paths</h4>' );
+	/**
+	 * Register the path callback
+	 *
+	 * @static
+	 * @param GB_Router $router
+	 * @return void
+	 */
+	public static function register_registration_callback( GB_Router $router ) {
+		$args = array(
+			'path' => self::$deal_feed_path,
+			'title' => 'MC Deals Feed',
+			'page_callback' => array( get_class(), 'on_feed_page' )
+		);
+		$router->add_route( self::DEAL_FEED_QUERY_VAR, $args );
 	}
 
-	public static function display_feed_path() {
-		echo trailingslashit( get_home_url() ) . ' <input type="text" name="' . self::DEAL_FEED_PATH_OPTION . '" id="' . self::DEAL_FEED_PATH_OPTION . '" value="' . esc_attr( self::$deal_feed_path ) . '" size="40"/><br />';
+	/**
+	 * We're on the feed page, so handle any form submissions from that page,
+	 * and make sure we display the correct information (i.e., the feed)
+	 *
+	 * @static
+	 * @return void
+	 */
+	public static function on_feed_page() {
+		// by instantiating, we process any submitted values
+		$feed = self::get_instance();
+		$feed->show_gbs_feed();
 	}
 
 
@@ -61,21 +88,10 @@ class Group_Buying_Mailchimp_Deal_Feeds extends Group_Buying_Controller {
 			return trailingslashit( home_url() ).trailingslashit( self::$deal_feed_path );
 		} else {
 			$router = GB_Router::get_instance();
-			return $router->get_url( 'gb_show_deal_feed' );
+			return $router->get_url( self::DEAL_FEED_QUERY_VAR );
 		}
 	}
 
-	/**
-	 * We're on the feed page, so handle any form submissions from that page,
-	 * and make sure we display the correct information (i.e., the feed)
-	 *
-	 * @static
-	 * @return void
-	 */
-	public static function on_deal_feed_page() {
-		// by instantiating, we process any submitted values
-		$deal_feed = self::get_instance();
-	}
 
 	/*
 	 * Singleton Design Pattern
@@ -92,7 +108,7 @@ class Group_Buying_Mailchimp_Deal_Feeds extends Group_Buying_Controller {
 	 *
 	 *
 	 * @static
-	 * @return Group_Buying_Mailchimp_Deal_Feeds
+	 * @return GB_MailChimp_Deal_Feeds
 	 */
 	public static function get_instance() {
 		if ( !( self::$instance && is_a( self::$instance, __CLASS__ ) ) ) {
@@ -101,19 +117,11 @@ class Group_Buying_Mailchimp_Deal_Feeds extends Group_Buying_Controller {
 		return self::$instance;
 	}
 
-	private function __construct() {
-		// $this->feed = Group_Buying_Feed::get_instance(); // TODO DAN optimize
-		if ( isset( $_GET[self::AFFILIATE_XML_QUERY_VAR] ) && !empty( $_GET[self::AFFILIATE_XML_QUERY_VAR] ) ) {
-			$this->affiliate_xml();
-		} else {
-			$this->top_deal_feed();
-		}
-	}
+	private function __construct() {}
 
-
-	public static function added_feed_example() {
-		// TODO a bunch of these need to be created, each with their own WP_Query args
-		self::deal_feed( $query_args );
+	public function show_gbs_feed() {
+		do_action( 'gb_show_gbs_deal_feed' );
+		$this->top_deal_feed();
 	}
 
 	/**
@@ -126,7 +134,7 @@ class Group_Buying_Mailchimp_Deal_Feeds extends Group_Buying_Controller {
 		$items = array();
 
 		$deals = GB_MailChimp_Utility::get_active_publish_deals(time());
-
+		error_log( 'deals +++++++++++++++++++++++: ' . print_r( $deals, TRUE ) );
 		foreach ($deals as $key => $value) {
 			$deal_id = $value->ID;
 			$post_thumbnail = ( has_post_thumbnail($deal_id) ) ? get_the_post_thumbnail($deal_id, 'deal-post-thumbnail-rss') : false;
@@ -573,250 +581,10 @@ class Group_Buying_Mailchimp_Deal_Feeds extends Group_Buying_Controller {
 			);
 		}
 
-		print self::get_deal_feed( apply_filters( 'gb_deal_feed_items', $items ) );
+		print Group_Buying_Feeds::get_feed( apply_filters( 'gb_deal_feed_items', $items ) );
 		exit;
 	}
 
-	/**
-	 * Display Deal XML Feed
-	 * @param  array  $query_args default query args
-	 * @return string             fully formatted XML feed
-	 */
-	public function affiliate_xml( $query_args = array() ) {
-		// Get deals
-		$query_args = self::query_args( $query_args );
-		$deals = new WP_Query( $query_args );
-
-		$items = array();
-		while ( $deals->have_posts() ) : $deals->the_post();
-			// Set ID
-			$deal_id = get_the_ID();
-
-			// Locations
-			$markets = array();
-			$market_names = array();
-			$market_array = array();
-			$market_name_array = array();
-			$locations = gb_get_deal_locations( $deal_id );
-			foreach ( $locations as $location ) {
-				$market_array[] = $location->slug;
-				$market_name_array[] = $location->name;
-			}
-			$markets = implode( ',', $market_array );
-			$market_names = implode( ',', $market_name_array );
-
-			// Categories
-			$categories = array();
-			$category_names = array();
-			$category_array = array();
-			$category_name_array = array();
-			$cats = gb_get_deal_categories( $deal_id );
-			foreach ( $cats as $cat ) {
-				$category_array[] = $cat->slug;
-				$category_name_array[] = $cat->name;
-			}
-			$categories = implode( ',', $category_array );
-			$category_names = implode( ',', $category_name_array );
-
-			// thumbnails
-			if ( has_post_thumbnail() ) {
-				$post_thumbnail_id = get_post_thumbnail_id( $deal_id );
-				if ( $post_thumbnail_id ) {
-					$image_array = wp_get_attachment_image_src( $post_thumbnail_id, 'post-thumbnail', false );
-					$image_url = $image_array[0];
-				}
-			}
-			// Content
-			$the_content = ( gb_get_rss_excerpt() ) ? gb_get_rss_excerpt() : get_the_content();
-
-			// Build Array
-			$items[$deal_id] = array(
-				'id' => $deal_id,
-				'market' => $markets,
-				'url' => get_permalink(),
-				'image_url' => $image_url,
-				'title' => get_the_title(),
-				'highlights' => gb_get_highlights(),
-				'restrictions' => gb_get_fine_print(),
-				'description' => $the_content,
-				'value' => gb_get_formatted_money( gb_get_deal_worth() ),
-				'price' => gb_get_formatted_money( gb_get_price() ),
-				'required_qty' => gb_get_min_purchases(),
-				'purchased_qty' => gb_get_number_of_purchases(),
-				'category' => $categories,
-				'purchase_link' => gb_get_add_to_cart_url(),
-				'savings' => gb_get_amount_saved()
-			);
-			// If has an expiration
-			if ( gb_has_expiration( $deal_id ) ) {
-				$items[$deal_id] += array(
-					'ending_time' => gb_get_deal_end_date( DATE_ATOM ),
-				);
-			}
-			// If item has an associated merchant
-			if ( gb_has_merchant( $deal_id ) ) {
-				$items[$deal_id] += array(
-					'merchant' => gb_get_merchant_name( gb_get_merchant_id() ),
-					'address' => gb_get_merchant_street( gb_get_merchant_id() ),
-					'city' => gb_get_merchant_city( gb_get_merchant_id() ),
-					'state' => gb_get_merchant_state( gb_get_merchant_id() ),
-					'zip' => gb_get_merchant_zip( gb_get_merchant_id() ),
-					'country' => gb_get_merchant_country( gb_get_merchant_id() ),
-					'phone' => gb_get_merchant_phone( gb_get_merchant_id() ),
-				);
-			}
-		endwhile;
-		// filter items
-		$items = apply_filters( 'gb_affiliate_xml_items', $items, $query_args );
-		$items = apply_filters( 'gb_affiliate_xml_items-' . $_GET[self::AFFILIATE_XML_QUERY_VAR], $items, $query_args );
-
-		// Print a XML feed
-		print self::get_xml_feed( $items );
-		
-		exit();
-	}
-
-	/**
-	 * Build query args for WP_Query based on URL query variables
-	 * @param  array $query_args default set of query_args
-	 * @return array             
-	 */
-	public static function query_args( $query_args = null ) {  // TODO DAN optimize
-
-		$post_type = ( isset( $_GET['post_type'] ) || $query_args['post_type'] != '' ) ? $_GET['post_type'] : Group_Buying_Deal::POST_TYPE ; // this will break in almost every case.
-
-		$meta = array();
-		if ( isset( $_GET['expired'] ) ) {
-			if ( $_GET['expired'] != 'any' || $_GET['expired'] != 'all' ) { // unless it's set to everything we need to only show expired
-				$meta[] = array(
-					'key' => '_expiration_date',
-					'value' => current_time( 'timestamp' ),
-					'compare' => '<' );
-			}
-		} else { // default to current deals.
-			$meta[] = array(
-				'key' => '_expiration_date',
-				'value' => array( 0, current_time( 'timestamp' ) ),
-				'compare' => 'NOT BETWEEN' );
-		}
-		$query_args = array(
-			'post_type' => $post_type,
-			'post_status' => 'publish',
-			'meta_query' => $meta,
-		);
-		if ( isset( $_GET['location'] ) && $_GET['location'] != '' ) {
-			$query_args[gb_get_location_tax_slug()] = $_GET['location'];
-		}
-
-		// Filter the Query Args
-		$query_args = apply_filters( 'gb_feed_query_args', $query_args );
-		if ( isset( $_GET[self::AFFILIATE_XML_QUERY_VAR] ) ) {
-			$query_args = apply_filters( 'gb_affiliate_feed_query_args-' . $_GET[self::AFFILIATE_XML_QUERY_VAR], $query_args );
-		}
-		return $query_args;
-	}
-
-	/**
-	 * Build feed for deals, differs from affiliate_xml
-	 * @param  array  $items array of items to build nodes from
-	 * @return string        RSS formatted XML feed
-	 */
-	public static function get_deal_feed( $items = array() ) {
-
-		if ( empty( $items ) ) return; // nothing to do.
-
-		$shift = $items;
-		$first_item = array_shift( $shift );
-		ob_start();
-		header( "Content-Type:text/xml" );
-		?>
-			<rss version="2.0"
-				xmlns:content="http://purl.org/rss/1.0/modules/content/"
-				xmlns:dc="http://purl.org/dc/elements/1.1/"
-				xmlns:atom="http://www.w3.org/2005/Atom"
-				xmlns:sy="http://purl.org/rss/1.0/modules/syndication/">
-				<channel>
-		<?php 
-					if ( !empty( $first_item['pubDate'] ) ) {
-						echo '<pubDate>'.$first_item['pubDate'].'</pubDate>';
-					}
-
-					foreach ( $items as $item ) {
-						echo "<item>\n";
-						foreach ( $item as $node => $content ) {
-							if ( $node == "content:encoded" || $node == "description" ) {
-								echo "<".$node."><![CDATA[".$content."]]></".$node.">\n";
-							} else {
-								echo "<".$node.">".$content."</".$node.">\n";
-							}
-						}
-						echo "</item>\n\n";
-					} 
-		?>
-				</channel>
-			</rss>
-		<?php
-		$deal_feed = ob_get_clean();
-		return apply_filters( 'gb_get_feed', $deal_feed, $items );
-	}
-
-	/**
-	 * Build feed for deals, differs from get_feed since it's not RSS formatted
-	 * @param  array  $items array of items to build nodes from
-	 * @return string        an XML feed
-	 */
-	public static function get_xml_feed( $items = array() ) {
-
-		if ( empty( $items ) ) return; // nothing to do.
-
-		ob_start();
-		header( "Content-Type:text/xml" );
-			echo "<itemset>\n";
-				foreach ( $items as $item ) {
-					echo "<item>\n";
-					foreach ( $item as $node => $content ) {
-						if ( in_array( $node, array( "highlights", "restrictions", "description", "merchant", "address", "city", "state" , "zip" , "country", "phone", "excerpt" ) ) ) {
-							echo "<".$node."><![CDATA[".$content."]]></".$node.">\n";
-						} else {
-							echo "<".$node.">".$content."</".$node.">\n";
-						}
-					}
-					echo "</item>\n\n";
-				}
-			echo "</itemset>\n";
-		$deal_feed = ob_get_clean();
-		$filter_feed = apply_filters( 'gb_get_xml_feed', $deal_feed, $items );
-		if ( isset( $_GET[self::AFFILIATE_XML_QUERY_VAR] ) ) {
-			$filter_feed = apply_filters( 'gb_get_xml_feed-' . $_GET[self::AFFILIATE_XML_QUERY_VAR], $filter_feed, $items );
-		}
-		return $filter_feed;
-	}
-
-	/**
-	 * Filter the default WP Feed for all deals and include some meta info
-	 * @param  string $content full content of post
-	 * @return string          content
-	 */
-	public function deal_feed_custom_rss( $content ) {
-		global $post;
-		if ( has_post_thumbnail( $post->ID ) ) {
-			$content = '<p>' . get_the_post_thumbnail( $post->ID, 'gbs_voucher_thumb' ) . '</p>';
-		}
-		if ( get_post_type( $post->ID ) == Group_Buying_Deal::POST_TYPE ) {
-			$content = ( has_post_thumbnail( get_the_ID() ) ) ? get_the_post_thumbnail( get_the_ID(), 'gbs_voucher_thumb' ) : '';
-			$content .= '<p><strong>'.gb_get_formatted_money( gb_get_deal_worth() ).'</strong></p>';
-			$content .= '<p>'.self::__( 'Expires On:' ).' '.gb_get_deal_end_date().'<br/>'.sprintf( self::__( '<span>%s</span> buyers!' ), gb_get_number_of_purchases() ).'<br/>'.self::__( 'Savings:' ).' '.gb_get_amount_saved().'</p>';
-			if ( gb_get_rss_excerpt() != '' ) {
-				$content .= gb_get_rss_excerpt();
-			} else {
-				$content .= get_the_content();
-			}
-			$content = apply_filters( 'deal_feed_custom_rss_content', $content, $post->ID );
-		} else {
-			$content .= get_the_content();
-		}
-		return apply_filters( 'gb_deal_feed_custom_rss', $content );
-	}
 	public static function cutGBSText($value, $length)
 	{   
 		if(is_array($value)) list($string, $match_to) = $value;
