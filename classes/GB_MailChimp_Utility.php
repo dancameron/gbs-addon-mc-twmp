@@ -290,7 +290,7 @@ class GB_MailChimp_Utility {
 
 	public static function get_active_publish_deals( $timestamp ) {
 		global $wpdb;
-		$sql = "SELECT * FROM wp_posts, wp_postmeta WHERE post_type='gb_deal' AND post_status='publish' AND wp_posts.ID=wp_postmeta.post_id AND meta_key='_expiration_date' AND (meta_value>='%s' OR meta_value='-1') ORDER by post_date DESC";
+		$sql = "SELECT * FROM {$wpdb->posts}, {$wpdb->postmeta} WHERE post_type='gb_deal' AND post_status='publish' AND {$wpdb->posts}.ID={$wpdb->postmeta}.post_id AND meta_key='_expiration_date' AND (meta_value>='%s' OR meta_value='-1') ORDER by post_date DESC";
 		$query = $wpdb->prepare( $sql, $timestamp );
 		return (array)$wpdb->get_results( $query );
 	}
