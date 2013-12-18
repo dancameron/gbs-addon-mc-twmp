@@ -1,6 +1,6 @@
 <?php
 
-class GB_MailChimp_Utility extends Group_Buying_Post_Type {
+class GB_MailChimp_Utility {
 
 	/**
 	 *
