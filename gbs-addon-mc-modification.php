@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Group Buying Addon - TWMP MailChimp Modification
-Version: 1.2
+Version: 1
 Plugin URI: http://groupbuyingsite.com/marketplace
 Description: Unknown
 Author: Sprout Venture
