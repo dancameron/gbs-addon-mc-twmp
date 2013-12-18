@@ -1,7 +1,7 @@
 <?php
 if ( class_exists( 'Group_Buying_Controller' ) ) {
 
-	include_once(ABSPATH . WPINC . '/MCAPI.class.php');
+	include_once(GB_TWMP_MC_PATH . '/lib/MCAPI.class.php');
 
 	class Group_Buying_Mailchimp_Settings extends Group_Buying_Controller {
 		const MAILCHIMP_API_KEY_OPTION = 'gbs_mailchimp_api_key';
@@ -377,6 +377,3 @@ if ( class_exists( 'Group_Buying_Controller' ) ) {
 		}
 	}
 }
-
-add_action( 'init', array( 'Group_Buying_Mailchimp_Settings', 'init' ) );
-?>

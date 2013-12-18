@@ -1,0 +1,46 @@
+.main-box {
+	margin:5px 0 0 5px;
+	display:inline-block;
+	width: 100%;
+}
+.form-tab {
+	width:100%;
+	display:inline-block;
+	margin-bottom:15px;
+	padding:6px 10px;
+}
+.form-tab-2 {
+	width:56%;
+	display:inline-block;
+	margin-left:5px;
+ 
+}
+.form-tab input, #gbs_mandrill_top_template, #gbs_top_purchase_deal_id{
+	width: 310px;
+}
+.form-tab-2 input{
+	width:25% !important;
+}
+.form-tab .numeric-field, .form-tab-2 .numeric-field{
+	width:50px !important;
+}
+.mail-chimp-top-group-select,.mail-chimp-non-renewed-group-select{
+	width: 176px;
+}
+#gbs_mailchimp_top_purchase_group_add_parents, #gbs_mailchimp_top_purchase_group_remove_parents, #gbs_mailchimp_non_renewed_group_parents{
+	width: 120px;
+}
+.label {
+	display: inline-block;
+	width: 200px;
+}
+.form-tab:hover {
+	background-color: #F3F3F3;
+}
+#wpfooter {
+	position:relative !important;
+	bottom:5px;
+}
+.display-error-message {
+	color: red;
+}
