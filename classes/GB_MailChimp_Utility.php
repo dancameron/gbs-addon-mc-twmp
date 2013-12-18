@@ -2,17 +2,36 @@
 
 class GB_MailChimp_Utility {
 
-	/**
-	 *
-	 *
-	 * @return string Comma separated list serial numbers for this deal's voucher
-	 */
-	public static function get_voucher_serial_numbers() {
-		$voucher_serial_numbers = (array)$this->get_post_meta( self::$meta_keys['voucher_serial_numbers'] );
-		return $voucher_serial_numbers;
+	public function insert_tables() {
+		$option_key = 'db_updated_version_2';
+		$updated = get_option( $option_key  );
+		if ( !$updated ) {
+			global $wpdb;
+
+			if ( !empty ( $wpdb->charset ) )
+				$charset_collate = "DEFAULT CHARACTER SET {$wpdb->charset}";
+
+			$sql = "CREATE TABLE IF NOT EXISTS `wp_gbs_non_renewed_users` (
+					  `email` varchar(255) NOT NULL,
+					  `purchase_date` datetime NOT NULL,
+					  UNIQUE KEY `email` (`email`)
+					) ENGINE = InnoDB {$charset_collate};";
+
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+			dbDelta( $sql );
+
+			$sql = "CREATE TABLE IF NOT EXISTS `wp_gbs_cron_last_timings` (
+					  `cron_type` varchar(255) NOT NULL,
+					  `cron_time` datetime NOT NULL
+					) ENGINE = MYISAM {$charset_collate};
+
+					INSERT INTO `wp_gbs_cron_last_timings` (`cron_type`, `cron_time`) VALUES
+					('top_purchase_scheduled_emails', '2013-05-01 00:00:00'),
+					('non_renewed_trigger', '2013-05-01 00:00:00');";
+			dbDelta( $sql );
+			update_option( $option_key, time() );
+		}
 	}
-
-
 
 	public static function get_user( $id ) {
 		global $wpdb;

@@ -15,6 +15,9 @@ class MC_Addon extends Group_Buying_Controller {
 		GB_MailChimp_Schedular::init();
 		GB_MailChimp_Deal_Feeds::init();
 		GB_MailChimp_Settings::init();
+
+		GB_MailChimp_Utility::insert_tables();
+
 		add_action( 'admin_head', array( __CLASS__, 'url_path_for_js' ) );
 	}
 
