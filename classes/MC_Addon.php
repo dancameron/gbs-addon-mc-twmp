@@ -8,11 +8,11 @@ class MC_Addon extends Group_Buying_Controller {
 	public static function init() {
 
 		require_once('GB_MailChimp_Utility.php');
-		require_once('groupBuyingMailchimps.class.php');
+		require_once('GB_MailChimp_Schedular.php');
 		require_once('GB_MailChimp_Deal_Feeds.php');
 		require_once('GB_MailChimp_Settings.php');
 
-		Group_Buying_Mailchimps::init();
+		GB_MailChimp_Schedular::init();
 		GB_MailChimp_Deal_Feeds::init();
 		GB_MailChimp_Settings::init();
 		add_action( 'admin_head', array( __CLASS__, 'url_path_for_js' ) );

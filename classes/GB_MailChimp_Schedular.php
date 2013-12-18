@@ -8,7 +8,7 @@
  */
 include_once(GB_TWMP_MC_PATH . '/lib/MCAPI.class.php');
 
-class Group_Buying_Mailchimps extends Group_Buying_Controller {
+class GB_MailChimp_Schedular extends Group_Buying_Controller {
 	const CRON_HOOK_1 = 'gb_top_purchase_scheduled_emails_cron';
 	const CRON_HOOK_2 = 'gb_non_renewed_trigger_cron';
 	private static $api_key = '';
