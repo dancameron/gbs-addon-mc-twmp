@@ -134,16 +134,13 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		$items = array();
 
 		$deals = GB_MailChimp_Utility::get_active_publish_deals(time());
-		error_log( 'deals +++++++++++++++++++++++: ' . print_r( $deals, TRUE ) );
-		foreach ($deals as $key => $value) {
-			$deal_id = $value->ID;
-			$post_thumbnail = ( has_post_thumbnail($deal_id) ) ? get_the_post_thumbnail($deal_id, 'deal-post-thumbnail-rss') : false;
-			$deal = GB_MailChimp_Utility::get_deal_details($deal_id);
-			$categories = GB_MailChimp_Utility::get_deal_categories($deal_id);
-			$price = GB_MailChimp_Utility::get_deal_meta($deal_id, '_base_price');
-			$discount = GB_MailChimp_Utility::get_deal_meta($deal_id, '_amount_saved');
-			$image_id = GB_MailChimp_Utility::get_deal_meta($deal_id, '_thumbnail_id');
-			$image = GB_MailChimp_Utility::get_deal_meta($image_id, '_wp_attached_file');
+		foreach ($deals as $key => $post ) {
+			$deal_id = $post->ID;
+			$deal = Group_Buying_Deal::get_instance( $deal_id );
+			$categories = array_shift( gb_get_deal_categories($deal_id) );
+			$price = $deal->get_price();
+			$discount = $deal->get_amount_saved();
+			$post_thumbnail = ( has_post_thumbnail( $deal_id ) ) ? wp_get_attachment_url( get_post_thumbnail_id( $deal_id ) ) : false;
 
 			$html = '
 			
@@ -463,7 +460,7 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		
 		<td width="50"><!-- --></td>
 		
-		<td width="284" align="left" valign="middle"><img src="'.site_url().'/wp-content/uploads/'.$image.'" width="274" height="196" mc:edit="Box_image_2" mc:allowdesigner alt=""  /></td>
+		<td width="284" align="left" valign="middle"><img src="'.$post_thumbnail.'" width="274" height="196" mc:edit="Box_image_2" mc:allowdesigner alt=""  /></td>
 		
 		<td width="20"><!-- --></td>
 		
@@ -475,7 +472,7 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		</tr>
 		
 		<tr>
-		<td align="left" class="body-text-bold" style="font-size:16px;font-weight:bold;" mc:edit="body_bold_text" mc:allowdesigner="mc:allowdesigner" ><strong>'.self::cutGBSText($deal['post_title'],120).'</strong></td>
+		<td align="left" class="body-text-bold" style="font-size:16px;font-weight:bold;" mc:edit="body_bold_text" mc:allowdesigner="mc:allowdesigner" ><strong>'.self::cutGBSText($deal->get_title(),120).'</strong></td>
 		</tr>
 		<tr>
 		<td  height="16"><!-- --></td>
@@ -551,13 +548,13 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		<td height="12"><!-- --></td>
 		</tr>
 		<tr>
-		<td align="left" class="body-text-bold" mc:edit="body_bold_text" mc:allowdesigner="mc:allowdesigner" ><!--REMOVED BY DUSTIN '.$deal['post_content'].'--></td>
+		<td align="left" class="body-text-bold" mc:edit="body_bold_text" mc:allowdesigner="mc:allowdesigner" ><!--REMOVED BY DUSTIN '.$post->post_content.'--></td>
 		</tr>
 		<tr>
 		<td  height="0"><!-- --></td>
 		</tr>
 		<tr>
-		<td align="center" mc:edit="top_box_image" mc:allowdesigner="mc:allowdesigner" width="120px" style="background-color:#ac0003; color:#ffffff; border:1px solid #660b0e;cursor: pointer; display: block; font-family:Arial, Helvetica, sans-serif; font-size:12px; padding-top:5px; padding-bottom:5px; text-decoration:none; "><a style="color:#ffffff; font-weight:bold;text-decoration:none;" href="'.$deal['guid'].'" class="">Δείξε μου το Deal</a> </td>
+		<td align="center" mc:edit="top_box_image" mc:allowdesigner="mc:allowdesigner" width="120px" style="background-color:#ac0003; color:#ffffff; border:1px solid #660b0e;cursor: pointer; display: block; font-family:Arial, Helvetica, sans-serif; font-size:12px; padding-top:5px; padding-bottom:5px; text-decoration:none; "><a style="color:#ffffff; font-weight:bold;text-decoration:none;" href="'.$post->guid.'" class="">Δείξε μου το Deal</a> </td>
 		</tr>
 		</table>
 		</td>
@@ -569,15 +566,15 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		</table>';
 
 			$items[] = array(
-				'title' => $deal['post_title'],
-//				'link' => urlencode($deal['guid']),
-//				'categories' => $categories ? implode(',', $categories) : '',
-				'category' => $categories ? $categories['slug'] : '',
-//				'dc:creator' => $deal['post_author'],
+				'title' => $deal->get_title(),
+				//'link' => urlencode($deal['guid']),
+				//'categories' => $categories ? implode(',', $categories) : '',
+				'category' => $categories ? $categories->slug : '',
+				//'dc:creator' => $deal['post_author'],
 				'description' => $html, //$deal['post_content'],
 				'content:encoded' => $html, //$deal['post_content_filtered'],
-				'guid' => urlencode($deal['guid']),
-//				'pubDate' => $deal['post_date']
+				'guid' => urlencode($post->guid),
+				//'pubDate' => $deal['post_date']
 			);
 		}
 
