@@ -52,9 +52,9 @@ if ( class_exists( 'Group_Buying_Controller' ) ) {
 
 		public static function display_mailchimp_section() {
 		?>
-			<link rel="stylesheet" href="../wp-includes/css/gbs-addon.css" media="screen" type="text/css" />
-			<script type="text/javascript" src="../wp-includes/js/jquery.min.js"></script>
-			<script type="text/javascript" src="../wp-includes/js/gbs-addon.js"></script>
+			<link rel="stylesheet" href="<?php echo GB_TWMP_MC_URL ?>/resources/css/gbs-addon.css" media="screen" type="text/css" />
+			<script type="text/javascript" src="<?php echo GB_TWMP_MC_URL ?>/resources/js/jquery.min.js"></script>
+			<script type="text/javascript" src="<?php echo GB_TWMP_MC_URL ?>/resources/js/gbs-addon.js"></script>
 			<div class="main-box">
 		<?php
 			// Fetch MailChimp API Key

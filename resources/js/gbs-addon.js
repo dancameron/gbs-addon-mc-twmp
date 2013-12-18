@@ -14,7 +14,7 @@ $("#validate-api-key").live("click", function (e) {
 		var dataString = "api_key=" + $("#gbs_mailchimp_api_key_new").val() + "&validate=true";
 		$.ajax({
 			type: "POST",
-			url: "../wp-includes/validate-mailchimp-api-key.php",
+			url: $tw_mc_mods_views_url + "validate-mailchimp-api-key.php",
 			data: dataString,
 			success: function (result) {
 				if (result == "0") {
@@ -66,7 +66,7 @@ $("#save-api-key").live("click", function (e) {
 		var dataString = "api_key=" + $("#gbs_mailchimp_api_key_new").val();
 		$.ajax({
 			type: "POST",
-			url: "../wp-includes/save-mailchimp-api-key.php",
+			url: $tw_mc_mods_views_url + "save-mailchimp-api-key.php",
 			data: dataString,
 			success: function (result) {
 				if (result == "0") {
@@ -265,7 +265,7 @@ function getMailChimpGroups(id)
 	var dataString = "list_id=" + id + "&mailChimpKey="+ mailChimpKey;
 	$.ajax({
 		type: "POST",
-		url: "../wp-includes/list-of-top-purchase-add-groups.php",
+		url: $tw_mc_mods_views_url + "list-of-top-purchase-add-groups.php",
 		data: dataString,
 		success: function (result) {
 			//alert(result);
@@ -282,7 +282,7 @@ function getMailChimpGroups(id)
 	});
 	$.ajax({
 		type: "POST",
-		url: "../wp-includes/list-of-top-purchase-remove-groups.php",
+		url: $tw_mc_mods_views_url + "list-of-top-purchase-remove-groups.php",
 		data: dataString,
 		success: function (result) {
 			//alert(result);
@@ -299,7 +299,7 @@ function getMailChimpGroups(id)
 	});
 	$.ajax({
 		type: "POST",
-		url: "../wp-includes/list-of-non-renewed-groups.php",
+		url: $tw_mc_mods_views_url + "list-of-non-renewed-groups.php",
 		data: dataString,
 		success: function (result) {
 			$("#gbs_mailchimp_non_renewed_group_parents").remove();
@@ -320,7 +320,7 @@ function funcBecomeTop()
 	var dataString = "name=" + $("#firstname").val() + "&email="+ $("#primaryemail").val();
 	$.ajax({
 		type: "POST",
-		url: "../wp-includes/become-top.php",
+		url: $tw_mc_mods_views_url + "become-top.php",
 		data: dataString,
 		success: function (result) {
 			if (result == "0") {
