@@ -61,7 +61,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		self::gbs_write_to_file("Current Time: " . $current_time, 0);
 
 		// Connect to MailChimp API
-		$api = Group_Buying_MailChimp_Model::validate_mailchimp_api_key(self::$api_key);
+		$api = Group_Buying_Mailchimp_Model::validate_mailchimp_api_key(self::$api_key);
 		if (!$api) {
 			self::gbs_write_to_file("API Key Error");
 			return false;
@@ -75,7 +75,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		}
 
 		// Fetch MailChimp Groups
-		$groups = Group_Buying_MailChimp_Model::get_mailchimp_groups( $api, $list_id );
+		$groups = Group_Buying_Mailchimp_Model::get_mailchimp_groups( $api, $list_id );
 		if (!isset($groups['top_purchase_group_add'])) {
 			self::gbs_write_to_file("Add Group not Found");
 			return false;
@@ -109,10 +109,10 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 			return false;
 		}
 
-		$order_id = Group_Buying_MailChimp_Model::get_deal_order_record( $purchase_id );
+		$order_id = Group_Buying_Mailchimp_Model::get_deal_order_record( $purchase_id );
 		self::gbs_write_to_file("Order ID: " . $order_id);
 
-		$order_status = Group_Buying_MailChimp_Model::get_deal_order_status( $order_id );
+		$order_status = Group_Buying_Mailchimp_Model::get_deal_order_status( $order_id );
 		self::gbs_write_to_file("Order Status: " . $order_status);
 
 		if (!$is_voucher && $order_status == 'pending')
@@ -122,7 +122,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		self::gbs_write_to_file("User ID: " . $user_id);
 
 		// Fetch User
-		$user = Group_Buying_MailChimp_Model::get_user($user_id);
+		$user = Group_Buying_Mailchimp_Model::get_user($user_id);
 		self::gbs_write_to_file("User Email: " . $user['user_email']);
 
 		// Check User
@@ -136,10 +136,10 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 			// Subscribe to List& Groups
 			$result = $api->listSubscribe($list_id, $user['user_email'], $merge_vars, 'html', 'false', 'true');
 			if (!$api->errorCode) {
-				if (Group_Buying_MailChimp_Model::check_non_renewed_user( $user['user_email']))
-					Group_Buying_MailChimp_Model::update_non_renewed_user( $user['user_email'], date('Y-m-d H:i:s') );
+				if (Group_Buying_Mailchimp_Model::check_non_renewed_user( $user['user_email']))
+					Group_Buying_Mailchimp_Model::update_non_renewed_user( $user['user_email'], date('Y-m-d H:i:s') );
 				else
-					Group_Buying_MailChimp_Model::add_non_renewed_user( $user['user_email'], date('Y-m-d H:i:s') );
+					Group_Buying_Mailchimp_Model::add_non_renewed_user( $user['user_email'], date('Y-m-d H:i:s') );
 			} 
 			self::gbs_write_to_file("Result: " . $result);
 		}
@@ -153,7 +153,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		self::gbs_write_to_file("Current Time: " . $current_time, 0);
 
 		// Connect to MailChimp API
-		$api = Group_Buying_MailChimp_Model::validate_mailchimp_api_key(self::$api_key);
+		$api = Group_Buying_Mailchimp_Model::validate_mailchimp_api_key(self::$api_key);
 		if (!$api) {
 			self::gbs_write_to_file("API Key Error");
 			return false;
@@ -167,7 +167,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		}
 
 		// Fetch MailChimp Groups
-		$groups = Group_Buying_MailChimp_Model::get_mailchimp_groups( $api, $list_id );
+		$groups = Group_Buying_Mailchimp_Model::get_mailchimp_groups( $api, $list_id );
 		if (!isset($groups['non_renewed_group'])) {
 			self::gbs_write_to_file("Non-Renewed Group not Found");
 			return false;
@@ -182,7 +182,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		self::gbs_write_to_file("Deal IDs: " . implode(',' , $deal_ids));
 
 		// Fetch Last Cron Time
-		$last_cron_time = Group_Buying_MailChimp_Model::get_last_cron_time( 'top_purchase_scheduled_emails' );
+		$last_cron_time = Group_Buying_Mailchimp_Model::get_last_cron_time( 'top_purchase_scheduled_emails' );
 		self::gbs_write_to_file("Last Cron Time: " . $last_cron_time);
 
 		// Get Scheduled Templates and Delays
@@ -204,13 +204,13 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 				self::gbs_write_to_file("Product Purchase Date: " . $product_purchase_date);
 
 				// Fetch Purchase IDs for Top Deals after Last Cron
-				$purchase_ids = Group_Buying_MailChimp_Model::get_purchases_for_top_deal_on_date( $deal_ids, $product_purchase_date );
+				$purchase_ids = Group_Buying_Mailchimp_Model::get_purchases_for_top_deal_on_date( $deal_ids, $product_purchase_date );
 				self::gbs_write_to_file("Purchases: " . count($purchase_ids));
 
 				if (count($purchase_ids)) {
 					// Fetch Users
 					foreach ($purchase_ids as $k=>$v) {
-						$user_id = Group_Buying_MailChimp_Model::get_deal_purchase_record( $v->post_id );
+						$user_id = Group_Buying_Mailchimp_Model::get_deal_purchase_record( $v->post_id );
 						if (!in_array($user_id, $users)) {
 							$users [] = $user_id;
 						}
@@ -219,7 +219,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 
 					foreach ($users as $k=>$v) {
 						// Fetch User
-						$user = Group_Buying_MailChimp_Model::get_user($v);
+						$user = Group_Buying_Mailchimp_Model::get_user($v);
 						// Check User
 						if (isset($user)) {
 							// Check Member exist in List Group
@@ -242,7 +242,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 					if (count($final_users)) {
 						$user_emails = array();
 						foreach ($final_users as $k=>$v) {
-							$user = Group_Buying_MailChimp_Model::get_user($v);
+							$user = Group_Buying_Mailchimp_Model::get_user($v);
 							$user_emails[] = $user['user_email'];
 						}
 						self::gbs_write_to_file("User Emails: " . implode(',' , $user_emails));
@@ -289,7 +289,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 				}
 			}
 		}
-		Group_Buying_MailChimp_Model::update_last_cron_time( 'top_purchase_scheduled_emails' , $current_time );
+		Group_Buying_Mailchimp_Model::update_last_cron_time( 'top_purchase_scheduled_emails' , $current_time );
 		return true;
 	}
 
@@ -300,7 +300,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		self::gbs_write_to_file("Current Time: " . $current_time, 0);
 
 		// Connect to MailChimp API
-		$api = Group_Buying_MailChimp_Model::validate_mailchimp_api_key(self::$api_key);
+		$api = Group_Buying_Mailchimp_Model::validate_mailchimp_api_key(self::$api_key);
 		if (!$api) {
 			self::gbs_write_to_file("API Key Error");
 			return false;
@@ -314,14 +314,14 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		}
 
 		// Fetch MailChimp Groups
-		$groups = Group_Buying_MailChimp_Model::get_mailchimp_groups( $api, $list_id );
+		$groups = Group_Buying_Mailchimp_Model::get_mailchimp_groups( $api, $list_id );
 		if (!isset($groups['non_renewed_group'])) {
 			self::gbs_write_to_file("Non-Renewed Group not Found");
 			return false;
 		}
 
 		// Fetch Last Cron Time
-		$last_cron_time = Group_Buying_MailChimp_Model::get_last_cron_time( 'non_renewed_trigger' );
+		$last_cron_time = Group_Buying_Mailchimp_Model::get_last_cron_time( 'non_renewed_trigger' );
 		self::gbs_write_to_file("Last Cron Time: " . $last_cron_time);
 
 		// Get Cutoff Period
@@ -338,7 +338,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 
 		// Get All Users from wp_gbs_non_renewed_users having last purchase date before cutoff time
 		// Additionally, also cutting off those users which are already updated to non-renewed group
-		$users = Group_Buying_MailChimp_Model::get_non_renewed_users_before_purchase_date( $last_purchase_time );
+		$users = Group_Buying_Mailchimp_Model::get_non_renewed_users_before_purchase_date( $last_purchase_time );
 		self::gbs_write_to_file("Total Users: " . count($users));
 
 		if ($users) {
@@ -366,7 +366,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 							self::gbs_write_to_file("Result: " . $result);
 							// Update or Insert in Table
 							if (!$api->errorCode) {
-								Group_Buying_MailChimp_Model::update_non_renewed_user( $value->email, date('Y-m-d H:i:s') );
+								Group_Buying_Mailchimp_Model::update_non_renewed_user( $value->email, date('Y-m-d H:i:s') );
 							}
 						}
 						else
@@ -379,7 +379,7 @@ class Group_Buying_Mailchimps extends Group_Buying_Controller {
 		}
 
 		// Update Cron Time
-		Group_Buying_MailChimp_Model::update_last_cron_time( 'non_renewed_trigger' , $current_time );
+		Group_Buying_Mailchimp_Model::update_last_cron_time( 'non_renewed_trigger' , $current_time );
 
 		return true;
 	}
