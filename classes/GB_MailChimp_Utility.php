@@ -2,6 +2,16 @@
 
 class GB_MailChimp_Utility {
 
+	public function validate_mailchimp_api_key( $api_key ) {
+		include_once(GB_TWMP_MC_PATH . '/lib/MCAPI.class.php');
+		$api = new MCAPI($api_key);
+		$retval = $api->ping($api_key);
+		if ($retval != "Everything's Chimpy!") {
+			return FALSE;
+		}
+		return $api;
+	}
+
 	public function insert_tables() {
 		$option_key = 'db_updated_version_2';
 		$updated = get_option( $option_key  );
