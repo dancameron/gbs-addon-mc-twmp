@@ -138,13 +138,20 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 			$deal_id = $post->ID;
 			$deal = Group_Buying_Deal::get_instance( $deal_id );
 			$categories = array_shift( gb_get_deal_categories($deal_id) );
+
 			$price = $deal->get_price();
 			$discount = $deal->get_amount_saved();
+
+			// calculate discount
+			$original_price = str_replace( '$', '', $deal->get_value() );
+			if ( $original_price != '' ) {
+				$discount = gb_get_formatted_money( $original_price - $price );
+			}
+
 			$post_thumbnail = ( has_post_thumbnail( $deal_id ) ) ? wp_get_attachment_url( get_post_thumbnail_id( $deal_id ) ) : false;
 
-			$html = '
-			
-				<style type="text/css">
+			ob_start(); ?>
+			<style type="text/css">
 						/**
 							* @tab Header
 							* @section top text
@@ -472,7 +479,7 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		</tr>
 		
 		<tr>
-		<td align="left" class="body-text-bold" style="font-size:16px;font-weight:bold;" mc:edit="body_bold_text" mc:allowdesigner="mc:allowdesigner" ><strong>'.self::cutGBSText($deal->get_title(),120).'</strong></td>
+		<td align="left" class="body-text-bold" style="font-size:16px;font-weight:bold;" mc:edit="body_bold_text" mc:allowdesigner="mc:allowdesigner" ><strong><?php echo self::cutGBSText($deal->get_title(),120) ?></strong></td>
 		</tr>
 		<tr>
 		<td  height="16"><!-- --></td>
@@ -502,7 +509,7 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		</tr>
 		<tr>
 		<td width="25"></td>
-		<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_price_2" mc:allowdesigner="mc:allowdesigner">'.$price.'&#8364;</td>
+		<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_price_2" mc:allowdesigner="mc:allowdesigner"><?php echo $price ?>&#8364;</td>
 		<td width="20"></td>
 		</tr>
 		<tr>
@@ -526,7 +533,7 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		</tr>
 		<tr>
 		<td width="35"></td>
-		<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_discount_2" mc:allowdesigner="mc:allowdesigner">'.$discount.'</td>
+		<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_discount_2" mc:allowdesigner="mc:allowdesigner"><?php echo $discount ?></td>
 		<td width="5"></td>
 		</tr>
 		<tr>
@@ -534,6 +541,33 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		</tr>
 		</table>
 		</td>
+
+		<?php if ( Group_Buying_Cashback_Rewards_Adv::display_reward( $deal_id ) ): ?>
+			<td width="120" class="white-box" style="background:#ffffff;border:1px solid #ccc;">
+			<table  cellpadding="0" cellspacing="0" border="0">
+			<tr>
+			<td  height="10"><!-- --></td>
+			</tr>
+			<tr>
+			<td width="25"></td>
+			<td align="left"  class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;"  mc:edit="top_box_discount_1" mc:allowdesigner="mc:allowdesigner">ανταμοιβές</td>
+			<td width="30"></td>
+			</tr>
+			<tr>
+			<td height="5"><!-- --></td>
+			</tr>
+			<tr>
+			<td width="35"></td>
+			<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_discount_2" mc:allowdesigner="mc:allowdesigner"><?php echo gb_get_formatted_money( Group_Buying_Cashback_Rewards_Adv::get_reward( $deal ) ) ?>+++++++++</td>
+			<td width="5"></td>
+			</tr>
+			<tr>
+			<td height="15"></td>
+			</tr>
+			</table>
+			</td>
+		<?php endif ?>
+
 		<td width="5"><!-- --></td>
 		<td></td>
 		</tr>
@@ -563,7 +597,9 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		<td width="0"><!-- --></td>
 		</tr>
 		
-		</table>';
+		</table> <?php
+
+		$html = ob_get_clean();
 
 			$items[] = array(
 				'title' => $deal->get_title(),
