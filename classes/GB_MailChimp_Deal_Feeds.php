@@ -145,7 +145,9 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 			// calculate discount
 			$original_price = str_replace( '$', '', $deal->get_value() );
 			if ( $original_price != '' ) {
-				$discount = gb_get_formatted_money( $original_price - $price );
+				$discount = (1-($price/$original_price))*100;
+				$discount = round($discount, 2);
+				// $discount = gb_get_formatted_money( $original_price - $price );
 			}
 
 			$post_thumbnail = ( has_post_thumbnail( $deal_id ) ) ? wp_get_attachment_url( get_post_thumbnail_id( $deal_id ) ) : false;
@@ -558,7 +560,7 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 			</tr>
 			<tr>
 			<td width="35"></td>
-			<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_discount_2" mc:allowdesigner="mc:allowdesigner"><?php echo gb_get_formatted_money( Group_Buying_Cashback_Rewards_Adv::get_reward( $deal ) ) ?>+++++++++</td>
+			<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_discount_2" mc:allowdesigner="mc:allowdesigner"><?php echo gb_get_formatted_money( Group_Buying_Cashback_Rewards_Adv::get_reward( $deal ) ) ?></td>
 			<td width="5"></td>
 			</tr>
 			<tr>
