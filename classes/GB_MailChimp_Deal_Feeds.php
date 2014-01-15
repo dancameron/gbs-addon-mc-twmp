@@ -535,7 +535,7 @@ class GB_MailChimp_Deal_Feeds extends Group_Buying_Controller {
 		</tr>
 		<tr>
 		<td width="35"></td>
-		<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_discount_2" mc:allowdesigner="mc:allowdesigner"><?php echo $discount ?></td>
+		<td align="center" class="red-box-text" style="font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:bold;" mc:edit="top_box_discount_2" mc:allowdesigner="mc:allowdesigner"><?php echo $discount ?>%</td>
 		<td width="5"></td>
 		</tr>
 		<tr>
