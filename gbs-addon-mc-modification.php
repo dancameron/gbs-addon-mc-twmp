@@ -17,7 +17,9 @@ define ('GB_TWMP_MC_URL', plugins_url( '', __FILE__) );
 // Load after all other plugins since we need to be compatible with groupbuyingsite
 add_action( 'plugins_loaded', 'gb_twmp_mc_mods' );
 function gb_twmp_mc_mods() {
-	require_once 'classes/MC_Addon.php';
-	// Hook this plugin into the GBS add-ons controller
-	add_filter( 'gb_addons', array( 'MC_Addon', 'gb_addon' ), 10, 1 );
+	if ( class_exists('Group_Buying_Controller') ) {
+		require_once 'classes/MC_Addon.php';
+		// Hook this plugin into the GBS add-ons controller
+		add_filter( 'gb_addons', array( 'MC_Addon', 'gb_addon' ), 10, 1 );
+	}
 }
